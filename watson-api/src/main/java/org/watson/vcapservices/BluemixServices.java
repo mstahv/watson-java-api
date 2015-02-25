@@ -3,7 +3,6 @@ package org.watson.vcapservices;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.HashMap;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -17,7 +16,7 @@ import org.apache.deltaspike.core.api.config.ConfigProperty;
  *
  * @author Matti Tahvonen
  */
-public class BluemixServices extends HashMap<String, List<QuestionAndAnswerConfig>> {
+public class BluemixServices {
 
     @Inject
     @ConfigProperty(name = "VCAP_SERVICES")
@@ -26,7 +25,7 @@ public class BluemixServices extends HashMap<String, List<QuestionAndAnswerConfi
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @PostConstruct
-    void init() {
+    public void init() {
         System.err.println("VCAP_SERVICES: " + configJson);
         try {
             jsonTree = objectMapper.readTree(configJson);
