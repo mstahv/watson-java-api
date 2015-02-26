@@ -19,7 +19,7 @@ import org.watson.questionandanswer.response.ResponseData;
  *
  * @author Matti Tahvonen
  */
-@CDIView("")
+@CDIView
 public class QuestionAndAnswerView extends MVerticalLayout implements View {
 
     @Inject
