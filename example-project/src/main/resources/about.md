@@ -1,8 +1,8 @@
 # Java APIs for Watson
 
-This is a sample application for Java APIs built for Watson APIs provided in
-Bluemix. Source code for both API library and this example is available via in 
-[GitHub](https://github.com/mstahv/watson-java-api).
+This is a sample application for Java APIs built for Watson services provided by
+[Bluemix](bluemix.net). Source code for both the API library and this example is 
+available via in [GitHub](https://github.com/mstahv/watson-java-api).
 
 To use these yourself, create services in Bluemix console and assign them to
 your Liberty server. In you inject service classes with CDI, they can 
