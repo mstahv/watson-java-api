@@ -1,4 +1,4 @@
-# JAX-RS 2 based Java API to Watson
+# Java API to Watson services
 
 This project provides a clean Java API to Watson. Behind the scenes uses JAX-RS 2 Client API to talk to Watson service. "Plug and play" in Bluemix using Liberty Profile - the CDI bean reads configurations automatically.
 
@@ -12,5 +12,5 @@ Dependencies:
 
 See the included Vaadin web app example as a reference usage.
 
-TODO figure out how to get this easily deployed to Bluemix&Liberty (dependency conflict with jax-rs stuff, need to use libertys beta feature and built in jax-rs-2).
+TODO figure out how to get this easily deployed to Bluemix&Liberty (dependency conflict with jax-rs stuff, need to use libertys beta feature and built in jax-rs-2). resttemplate branch using Spring RestTemplate currently works with Bluemix/Liberty as well. That also contains TextToSpeechService.
 

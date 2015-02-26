@@ -1,12 +1,15 @@
 package org.watson.vcapservices;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-public class QuestionAndAnswerConfig {
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class GenericServiceConfig {
 
     private String name;
     private String label;
     private String plan;
-    private Credentials credentials;
+    private GenericCredentials credentials;
 
     /**
      *
@@ -60,7 +63,7 @@ public class QuestionAndAnswerConfig {
      *
      * @return The credentials
      */
-    public Credentials getCredentials() {
+    public GenericCredentials getCredentials() {
         return credentials;
     }
 
@@ -68,7 +71,7 @@ public class QuestionAndAnswerConfig {
      *
      * @param credentials The credentials
      */
-    public void setCredentials(Credentials credentials) {
+    public void setCredentials(GenericCredentials credentials) {
         this.credentials = credentials;
     }
 
