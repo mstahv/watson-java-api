@@ -5,10 +5,13 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.TextField;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+
 import org.vaadin.viritin.button.PrimaryButton;
 import org.vaadin.viritin.fields.MTextField;
+import org.vaadin.viritin.fields.TypedSelect;
 import org.vaadin.viritin.label.RichText;
 import org.vaadin.viritin.layouts.MVerticalLayout;
 import org.watson.questionandanswer.QuestionAndAnswerService;
@@ -27,13 +30,16 @@ public class QuestionAndAnswerView extends MVerticalLayout implements View {
 
     final TextField question = new MTextField("Ask a question about travel:")
             .withFullWidth();
+    
+    TypedSelect<String> dataset = new TypedSelect<String>("travel", "healthcare").withCaption("Dataset");
+    
     PrimaryButton ask = new PrimaryButton("Watson, what do you think?",
             new Button.ClickListener() {
 
                 @Override
                 public void buttonClick(Button.ClickEvent event) {
                     String questionText = question.getValue();
-                    ResponseData test = service.askQuestion(questionText);
+                    ResponseData test = service.askQuestion(questionText, dataset.getValue());
 
                     StringBuilder sb = new StringBuilder();
                     for (Evidencelist a : test.getEvidencelist()) {
@@ -49,8 +55,9 @@ public class QuestionAndAnswerView extends MVerticalLayout implements View {
 
     @PostConstruct
     void init() {
+    	dataset.setValue("travel");
         question.setValue("What could I do in Tenerife?");
-        add(question, ask, answer);
+        add(dataset, question, ask, answer);
     }
 
     @Override

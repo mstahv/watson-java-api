@@ -1,13 +1,11 @@
 package org.watson.questionandanswer;
 
-import java.nio.charset.Charset;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -21,8 +19,8 @@ import org.watson.questionandanswer.request.QuestionAndAnswerRequest;
 import org.watson.questionandanswer.response.QuestionAndAnswerResponse;
 import org.watson.questionandanswer.response.ResponseData;
 import org.watson.vcapservices.BluemixServices;
-import org.watson.vcapservices.Credentials;
-import org.watson.vcapservices.QuestionAndAnswerConfig;
+import org.watson.vcapservices.GenericCredentials;
+import org.watson.vcapservices.GenericServiceConfig;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -37,12 +35,13 @@ public class QuestionAndAnswerService {
 
     @Inject
     BluemixServices bluemixServices;
-    private Credentials credentials;
+    
+    private GenericCredentials credentials;
 
     @PostConstruct
     public void init() {
 
-        List<QuestionAndAnswerConfig> qaList = bluemixServices
+        List<GenericServiceConfig> qaList = bluemixServices
                 .getQuestionAndAnswerConfig();
         if (qaList != null && !qaList.isEmpty()) {
             credentials = qaList.get(0).getCredentials();
@@ -54,25 +53,21 @@ public class QuestionAndAnswerService {
         }
     }
 
-    public ResponseData askQuestion(String questionText) {
-        return askQuestion(new Question(questionText));
+    public ResponseData askQuestion(String questionText, String dataset) {
+        return askQuestion(new Question(questionText), dataset);
     }
 
     private HttpHeaders createHeaders() {
         return new HttpHeaders() {
             {
-                String auth = credentials.getUsername() + ":" + credentials.getPassword();
-                byte[] encodedAuth = Base64.encodeBase64(
-                        auth.getBytes(Charset.forName("US-ASCII")));
-                String authHeader = "Basic " + new String(encodedAuth);
-                set("Authorization", authHeader);
+                set("Authorization", credentials.createAuthorizationHeaderValue());
                 setContentType(MediaType.APPLICATION_JSON);
                 set("Accept", "application/json");
             }
         };
     }
 
-    public ResponseData askQuestion(Question question) {
+    public ResponseData askQuestion(Question question, String dataset) {
         if (restTemplate == null) {
             // For some reason Liberty don't execute init method automatically
             init();
@@ -84,35 +79,19 @@ public class QuestionAndAnswerService {
             String json = objectMapper.writeValueAsString(request);
             final HttpHeaders createHeaders = createHeaders();
             HttpEntity<String> httpEntity = new HttpEntity<>(json, createHeaders);
-            
-            ResponseEntity<List<QuestionAndAnswerResponse>> response = restTemplate.
-                    exchange(credentials.getUrl() + "/v1/question/travel",
-                            HttpMethod.POST, httpEntity,
-                            new ParameterizedTypeReference<List<QuestionAndAnswerResponse>>() {
-                            });
-            return response.getBody().get(0).getQuestion();
 
-            // String writeValueAsString = new
-            // ObjectMapper().writeValueAsString(request);
-            // Response post =
-            // target.request(MediaType.APPLICATION_JSON).post(Entity.text(writeValueAsString));
-            // if(post.getStatus() == 500) {
-            // String readEntity = post.readEntity(String.class);
-            // System.out.println(readEntity);
-            // }
-            //
-            // String response = target.request(
-            // MediaType.APPLICATION_JSON).post(Entity.json(request),
-            // String.class);
-            // System.out.println(response);
-            // return null;
+            ResponseEntity<List<QuestionAndAnswerResponse>> response = restTemplate.
+                    exchange(credentials.getUrl() + "/v1/question/{category}",
+                            HttpMethod.POST, httpEntity,
+                            new ParameterizedTypeReference<List<QuestionAndAnswerResponse>>() {}, dataset);
+            return response.getBody().get(0).getQuestion();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
     }
     protected ObjectMapper objectMapper = new ObjectMapper();
 
-    public void init(QuestionAndAnswerConfig servicesConfig) {
+    public void init(GenericServiceConfig servicesConfig) {
         credentials = servicesConfig.getCredentials();
         doInit();
     }
