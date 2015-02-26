@@ -26,7 +26,6 @@ public class BluemixServices {
 
     @PostConstruct
     public void init() {
-        System.err.println("VCAP_SERVICES: " + configJson);
         try {
             jsonTree = objectMapper.readTree(configJson);
         } catch (Exception ex) {
@@ -34,11 +33,19 @@ public class BluemixServices {
         }
     }
 
-    public List<QuestionAndAnswerConfig> getQuestionAndAnswerConfig() {
+    public List<GenericServiceConfig> getQuestionAndAnswerConfig() {
         JsonNode node = jsonTree.get("question_and_answer");
         JavaType type = objectMapper.getTypeFactory().
                 constructCollectionType(List.class,
-                        QuestionAndAnswerConfig.class);
+                        GenericServiceConfig.class);
+        return objectMapper.convertValue(node, type);
+    }
+
+    public List<GenericServiceConfig> getTextToSpeechConfig() {
+        JsonNode node = jsonTree.get("text_to_speech");
+        JavaType type = objectMapper.getTypeFactory().
+                constructCollectionType(List.class,
+                        GenericServiceConfig.class);
         return objectMapper.convertValue(node, type);
     }
 
