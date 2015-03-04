@@ -1,10 +1,7 @@
 package org.watson.questionandanswer;
 
-
-import org.jboss.resteasy.client.jaxrs.BasicAuthentication;
 import org.watson.questionandanswer.request.Question;
 import org.watson.questionandanswer.request.QuestionAndAnswerRequest;
-import org.watson.questionandanswer.response.QuestionAndAnswerResponse;
 import org.watson.questionandanswer.response.ResponseData;
 import org.watson.vcapservices.BluemixServices;
 
@@ -15,11 +12,19 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+
 import java.util.List;
+
+import org.watson.vcapservices.BasicAuthenticationFilter;
 import org.watson.vcapservices.GenericCredentials;
 import org.watson.vcapservices.GenericServiceConfig;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import javax.ws.rs.core.GenericType;
+import org.watson.questionandanswer.response.QuestionAndAnswerResponse;
 
 /**
  * A Question and Answer service facade. If VCAP_SERVICES don't contain your
@@ -27,6 +32,9 @@ import org.watson.vcapservices.GenericServiceConfig;
  */
 @ApplicationScoped
 public class QuestionAndAnswerService {
+
+    private JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
+    private ObjectMapper objectMapper = provider.locateMapper(Object.class, MediaType.APPLICATION_JSON_TYPE);
 
     private Client client;
     private WebTarget target;
@@ -40,18 +48,25 @@ public class QuestionAndAnswerService {
         List<GenericServiceConfig> qaList = bluemixServices.
                 getQuestionAndAnswerConfig();
         if (qaList != null && !qaList.isEmpty()) {
-            final GenericCredentials credentials = qaList.get(0).getCredentials();
+            final GenericCredentials credentials = qaList.get(0).
+                    getCredentials();
 
             client = ClientBuilder.newBuilder()
-                    .register(new BasicAuthentication(credentials.
-                            getUsername(), credentials.
-                            getPassword()))
+                    .register(provider)
+                    .register(new BasicAuthenticationFilter() {
+
+                        @Override
+                        public String getHeader() {
+                            return credentials.createAuthorizationHeaderValue();
+                        }
+                    })
                     .build();
 
             target = client.target(credentials.getUrl()).path("v1").path(
                     "question");
         } else {
-            System.err.println("Warning, bleumix services couldn't read q&a config");
+            System.err.println(
+                    "Warning, bleumix services couldn't read q&a config");
         }
     }
 
@@ -59,9 +74,9 @@ public class QuestionAndAnswerService {
             String questionText, String dataset) {
         return askQuestion(new Question(questionText), dataset);
     }
-    
+
     public ResponseData askQuestion(Question question, String dataset) {
-        if(target == null) {
+        if (target == null) {
             // For some reason Liberty don't execute init method automatically
             init();
         }
@@ -75,23 +90,6 @@ public class QuestionAndAnswerService {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-    }
-
-    public void init(GenericServiceConfig servicesConfig) {
-        doInit(servicesConfig);
-    }
-
-    private void doInit(GenericServiceConfig servicesConfig) {
-        final GenericCredentials credentials = servicesConfig.getCredentials();
-
-        client = ClientBuilder.newBuilder()
-                .register(new BasicAuthentication(credentials.
-                                getUsername(), credentials.
-                                getPassword()))
-                .build();
-
-        target = client.target(credentials.getUrl()).path("v1").path(
-                "question").path("travel");
     }
 
 }
