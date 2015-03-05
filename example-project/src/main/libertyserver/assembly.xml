@@ -14,7 +14,7 @@
   <files>
       <file>
           <source>${project.build.directory}/${artifactId}-${version}.war</source>
-          <destName>myapp.war</destName>
+          <destName>apps/myapp.war</destName>
       </file>
   </files>
 </assembly>

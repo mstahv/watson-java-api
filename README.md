@@ -7,10 +7,12 @@ The library is in its early stages, only Questions and Answers API is added, but
 Dependencies:
 
  * DeltaSpike
- * JAX-RS 2
-  * Currently uses direct dependency to RestEasy (jax-rs 2 api in blumix is so far only as beta feature), but should be pretty make it use container provided service. Authentication would need implementation independent solution and dependencies should be declared provided.
+ * JAX-RS 2 (Available in Liberty and Bluemix as beta feature). The Demo project packages with suitable liberty server.xml for easy deployment.
 
-See the included Vaadin web app example as a reference usage.
+To run the example in Bluemix, install the api library, and then build the demo project.
 
-TODO figure out how to get this easily deployed to Bluemix&Liberty (dependency conflict with jax-rs stuff, need to use libertys beta feature and built in jax-rs-2). resttemplate branch using Spring RestTemplate currently works with Bluemix/Liberty as well. That also contains TextToSpeechService.
-
+    mvn clean install
+    cd example-project
+    mvn install
+    cf set-env <your-watson-demo-server> IBM_LIBERTY_BETA true
+    cf push <your-watson-demo-server> -p target/liberty-bluemix/liberty
