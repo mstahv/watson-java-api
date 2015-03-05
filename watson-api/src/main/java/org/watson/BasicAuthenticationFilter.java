@@ -1,5 +1,5 @@
 
-package org.watson.vcapservices;
+package org.watson;
 
 import java.io.IOException;
 import javax.ws.rs.client.ClientRequestContext;

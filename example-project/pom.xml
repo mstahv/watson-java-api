@@ -30,6 +30,11 @@
             <artifactId>watson-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>pl.exsio</groupId>
+            <artifactId>plupload-vaadin</artifactId>
+            <version>1.5.4</version>
+        </dependency>
     </dependencies>
     <build>
         <resources>
@@ -42,6 +47,19 @@
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>in.virit.vwscdn</groupId>
+                <artifactId>vwscdn-maven-plugin</artifactId>
+                <version>1.3.3</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -78,6 +96,10 @@
     </build>
     
     <repositories>
+        <repository>
+            <id>vaadin-addons</id>
+            <url>http://maven.vaadin.com/vaadin-addons</url>
+        </repository>
         <repository>
             <id>v4.tahvonen.fi</id>
             <url>http://v4.tahvonen.fi/maven2</url>

@@ -1,4 +1,4 @@
-package org.watson.vcapservices;
+package org.watson;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

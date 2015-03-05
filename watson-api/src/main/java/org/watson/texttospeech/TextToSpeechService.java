@@ -7,20 +7,13 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.watson.vcapservices.BluemixServices;
-import org.watson.vcapservices.GenericCredentials;
-import org.watson.vcapservices.GenericServiceConfig;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import org.watson.BluemixServices;
+import org.watson.GenericCredentials;
 import java.io.InputStream;
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
-import org.watson.vcapservices.BasicAuthenticationFilter;
 
 /**
  * A Question and Answer service facade. If VCAP_SERVICES don't contain your
@@ -29,45 +22,23 @@ import org.watson.vcapservices.BasicAuthenticationFilter;
 @ApplicationScoped
 public class TextToSpeechService {
 
-    private JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
-    private ObjectMapper objectMapper = provider.locateMapper(Object.class,
-            MediaType.APPLICATION_JSON_TYPE);
-
     @Inject
     BluemixServices bluemixServices;
 
-    private GenericCredentials credentials;
+    @Inject
     private Client client;
     private WebTarget target;
 
     @PostConstruct
     public void init() {
 
-        List<GenericServiceConfig> qaList = bluemixServices
-                .getTextToSpeechConfig();
-        if (qaList != null && !qaList.isEmpty()) {
-            final GenericCredentials credentials = qaList.get(0).
-                    getCredentials();
+        final GenericCredentials credentials = bluemixServices
+                .getTextToSpeechConfig().getCredentials();
 
-            client = ClientBuilder.newBuilder()
-                    .register(provider)
-                    .register(new BasicAuthenticationFilter() {
+        client.register(credentials);
 
-                        @Override
-                        public String getHeader() {
-                            return credentials.createAuthorizationHeaderValue();
-                        }
-                    })
-                    .build();
-
-            target = client.target(credentials.getUrl()).path("v1").path(
-                    "synthesize");
-
-        } else {
-            System.err
-                    .println(
-                            "Warning, bleumix services couldn't read q&a config");
-        }
+        target = client.target(credentials.getUrl()).path("v1").path(
+                "synthesize");
     }
 
     public List<String> getAvailableVoices() {
@@ -87,11 +58,8 @@ public class TextToSpeechService {
                     "text", text);
             Response response = queryParam.request("audio/ogg; codecs=opus").
                     get();
-            InputStream in = response.readEntity(InputStream.class);
-            try {
+            try (InputStream in = response.readEntity(InputStream.class)) {
                 return IOUtils.toByteArray(in);
-            } finally {
-                in.close();
             }
 
         } catch (Exception ex) {

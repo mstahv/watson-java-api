@@ -1,4 +1,4 @@
-package org.watson.vcapservices;
+package org.watson;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -34,16 +34,20 @@ public class BluemixServices {
         }
     }
 
-    public List<GenericServiceConfig> getQuestionAndAnswerConfig() {
-        JsonNode node = jsonTree.get("question_and_answer");
-        JavaType type = objectMapper.getTypeFactory().
-                constructCollectionType(List.class,
-                        GenericServiceConfig.class);
-        return objectMapper.convertValue(node, type);
+    public GenericServiceConfig getQuestionAndAnswerConfig() {
+        return getGenericServiceConfigs("question_and_answer").get(0);
     }
 
-    public List<GenericServiceConfig> getTextToSpeechConfig() {
-        JsonNode node = jsonTree.get("text_to_speech");
+    public GenericServiceConfig getTextToSpeechConfig() {
+        return getGenericServiceConfigs("text_to_speech").get(0);
+    }
+
+    public GenericServiceConfig getVisualRecognitionConfig() {
+        return getGenericServiceConfigs("visual_recognition").get(0);
+    }
+
+    private List<GenericServiceConfig> getGenericServiceConfigs(String key) {
+        JsonNode node = jsonTree.get(key);
         JavaType type = objectMapper.getTypeFactory().
                 constructCollectionType(List.class,
                         GenericServiceConfig.class);
