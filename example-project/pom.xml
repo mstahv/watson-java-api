@@ -30,11 +30,6 @@
             <artifactId>watson-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>pl.exsio</groupId>
-            <artifactId>plupload-vaadin</artifactId>
-            <version>1.5.4</version>
-        </dependency>
     </dependencies>
     <build>
         <resources>

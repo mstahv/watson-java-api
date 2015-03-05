@@ -9,19 +9,13 @@ import com.vaadin.cdi.CDIView;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.Notification;
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.commons.io.FileUtils;
+import com.vaadin.ui.Upload;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import org.vaadin.viritin.fields.MTable;
 import org.watson.visualrecognition.VisualRecognitionService;
 import org.watson.visualrecognition.response.Image;
 import org.watson.visualrecognition.response.Label;
-import pl.exsio.plupload.Plupload;
-import pl.exsio.plupload.PluploadError;
-import pl.exsio.plupload.PluploadFile;
 
 /**
  *
@@ -33,39 +27,34 @@ public class VisualRecognitionView extends MVerticalLayout implements View {
     @Inject
     VisualRecognitionService service;
 
-    final Plupload uploader = new Plupload("Browse", FontAwesome.FILES_O);
-
     MTable<Label> results = new MTable<>(Label.class);
+    
+    ByteArrayOutputStream bout = new ByteArrayOutputStream();
 
     @PostConstruct
     void init() {
 
-//autostart the uploader after addind files
-        uploader.addFilesAddedListener(new Plupload.FilesAddedListener() {
+        Upload upload = new Upload("Choose JPG image", new Upload.Receiver() {
+
             @Override
-            public void onFilesAdded(PluploadFile[] files) {
-                uploader.start();
+            public OutputStream receiveUpload(String filename,
+                    String mimeType) {
+                return bout;
+            }
+        });
+        upload.setIcon(FontAwesome.FILES_O);
+        upload.setImmediate(true);
+        upload.addSucceededListener(new Upload.SucceededListener() {
+
+            @Override
+            public void uploadSucceeded(Upload.SucceededEvent event) {
+                Image imageData = service.recognize(bout.toByteArray());
+                results.setBeans(imageData.getLabels());
+                bout.reset();
             }
         });
 
-        uploader.addFileUploadedListener(new Plupload.FileUploadedListener() {
-
-            @Override
-            public void onFileUploaded(PluploadFile file) {
-                System.out.println("Wahtsn");
-                File uploadedFile = file.getUploadedFile();
-                try {
-                    Image imageData = service.recognize(FileUtils.
-                            readFileToByteArray(uploadedFile));
-                    results.setBeans(imageData.getLabels());
-                } catch (IOException ex) {
-                    Logger.getLogger(VisualRecognitionView.class.getName()).
-                            log(Level.SEVERE, null, ex);
-                }
-            }
-        });
-
-        add(uploader, results);
+        add(upload, results);
 
     }
 
